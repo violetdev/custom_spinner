@@ -80,7 +80,6 @@ class Spinner extends React.Component {
     roll_pick() {
         var arr_len = this.state.textbox_array.length, store, rand_ele;
         var shuffle_array = [...Array(arr_len).keys()]
-        console.log(arr_len,shuffle_array)
         while (arr_len) {
             rand_ele = Math.floor(Math.random() * arr_len--);
             store = shuffle_array[arr_len];
@@ -121,7 +120,6 @@ class Spinner extends React.Component {
                 </li>
             )
         })
-        console.log(this.state)
         const circle = textbox_array.map((step, move) => {
             const angle = move * 360 / textbox_array.length;
             const keyframesStyle = `
