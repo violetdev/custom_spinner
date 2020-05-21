@@ -14,8 +14,9 @@ class Spinner extends React.Component {
             returning_num: 0,
             shuffle_array: [...Array(0).keys()],
             timeout_set: false,
+            timers: Array(0)
         };
-        this.handle_textbox_change = this.handle_textbox_change.bind(this)  
+        this.handle_textbox_change = this.handle_textbox_change.bind(this)
     }
 
     handleClick_add_textbox() {
@@ -32,49 +33,62 @@ class Spinner extends React.Component {
             [textbox_array.length]: "",
         });
     }
+
+    next_transition_test() {
+        if (!this.state.timeout_set && this.state.roll_animation_state !== "pre_roll") {
+            this.setState({
+                timeout_set: true,
+            })
+            this.transitioning_roll_states();
+        }
+    }
     
     transitioning_roll_states() {
         if (this.state.roll_animation_state === "pending") {
-            setTimeout(() => {
+            var set_pend = setTimeout(() => {
                 this.setState({
                     roll_animation_state: "returning",
                     timeout_set: false,
                 })
             }, this.state.textbox_array.length * 500)
+            this.state.timers.push(set_pend)
         } else if (this.state.roll_animation_state === "returning") {
-            setTimeout(() => {
+            var set_ret = setTimeout(() => {
                 this.setState({
                     roll_animation_state: "finish",
                     timeout_set: false,
                 })
-            }, this.state.textbox_array.length * 400)
-        } else if (this.state.roll_animation_state === "finish") {    
-            setTimeout(() => {
-                this.setState({
-                    roll_animation_state: "pre_roll",
-                    timeout_set: false,
-                })
-            }, 5000)
+            }, this.state.textbox_array.length * 450)
+            this.state.timers.push(set_ret)
         }
     }
 
     handleClick_animate_roll() {
-        this.setState({
-            roll_animation_state: "pending",
-        });
-        this.roll_pick();
-        let set_timer = setInterval(() => {
+        if (this.state.roll_animation_state === "pre_roll") {
             this.setState({
-                    cur_image: (this.state.cur_image) % 60 + 1,
+                roll_animation_state: "pending",
             });
-            if (this.state.cur_image === 60) {
-                clearInterval(set_timer)
-            } else if (this.state.cur_image === 40 && this.state.roll_animation_state !== "finish") {
+            this.roll_pick();
+            var set_timer = setInterval(() => {
                 this.setState({
-                    cur_image: 25,
+                        cur_image: (this.state.cur_image) % 60 + 1,
                 });
-            }
-        }, 50)
+                if (this.state.cur_image === 60) {
+                    clearInterval(set_timer)
+                } else if (this.state.cur_image === 40 && this.state.roll_animation_state !== "finish") {
+                    this.setState({
+                        cur_image: 25,
+                    });
+                }
+            }, 50)
+            this.state.timers.push(set_timer)
+        } else {
+            this.setState({
+                roll_animation_state: "pre_roll",
+                timeout_set: false,
+            });
+            this.state.timers.forEach(clearInterval);
+        }
     }
 
     roll_pick() {
@@ -128,14 +142,13 @@ class Spinner extends React.Component {
                 
                 100%  { transform: rotate(` + angle + `deg) rotate(-` + angle + `deg) rotateY(180deg)}
             }`;
-            deleteStyle(keyframesStyle);
-            injectStyle(keyframesStyle);
-
             const return_style = `
             @-webkit-keyframes pulse2_` + move + ` {
                 0%   { transform: rotate(` + angle + `deg) }
                 100%  { transform: rotate(` + angle + `deg) translate(350%) rotate(-` + angle + `deg)}
             }`;
+            deleteStyle(keyframesStyle);
+            injectStyle(keyframesStyle);
             deleteStyle(return_style);
             injectStyle(return_style);
 
@@ -146,8 +159,8 @@ class Spinner extends React.Component {
                     position: "absolute",
                     backgroundColor: "lightgreen",
                     borderRadius: "50%",
-                    width: "100px",
-                    height: "100px",
+                    width: "9%",
+                    height: "11%",
                     transform: "rotate(" + angle + "deg) translate(350%) rotate(-" + angle + "deg)",
                     animation: "pulse_" + move + " 0.5s",
                     animationDelay: move/5 + "s",
@@ -163,8 +176,8 @@ class Spinner extends React.Component {
                         position: "absolute",
                         backgroundColor: "grey",
                         borderRadius: "50%",
-                        width: "100px",
-                        height: "100px",
+                        width: "9%",
+                        height: "11%",
                         animation: "pulse2_" + move + " 0.3s",
                         animationDelay: this.state.shuffle_array[move]/2 + "s",
                         animationFillMode: "both",
@@ -178,8 +191,8 @@ class Spinner extends React.Component {
                         position: "absolute",  
                         backgroundColor: "lightblue",
                         borderRadius: "50%",
-                        width: "100px",
-                        height: "100px",
+                        width: "9%",
+                        height: "11%",
                         lineHeight: "550%",
                         textAlign: "center",
                     }
@@ -191,27 +204,22 @@ class Spinner extends React.Component {
                     position: "absolute",
                     backgroundColor: "lightgreen",
                     borderRadius: "50%",
-                    width: "100px",
-                    height: "100px",
+                    width: "9%",
+                    height: "11%",
                     transform: "rotate(" + angle + "deg) translate(350%) rotate(-" + angle + "deg)",
                     lineHeight: "550%",
                     textAlign: "center",
                 }
             }
-
             return (
                 <div ref = {this.refCallback} id = {move} className = "tick" style = {divStyle} >{this.state[move]}</div>
             )
         })
-        if (!this.state.timeout_set && this.state.roll_animation_state !== "pre_roll") {
-            this.setState({
-                timeout_set: true,
-            })
-            this.transitioning_roll_states();
-        }
 
-        let status;
-        status = 'Number of Events: ' + textbox_array.length;
+        var status = 'Number of Events: ' + textbox_array.length;;
+        var go_reset = this.state.roll_animation_state === "pre_roll" ? "GO" : "RESET"
+
+        this.next_transition_test()
 
         return (
         <div className="button_wrap">
@@ -231,7 +239,7 @@ class Spinner extends React.Component {
                 <button
                     className = "go_button"
                     onClick = {() => this.handleClick_animate_roll()}>
-                {"GO"}
+                {go_reset}
                 </button>
             </div>
 
