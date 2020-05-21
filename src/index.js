@@ -139,7 +139,6 @@ class Spinner extends React.Component {
             const keyframesStyle = `
             @-webkit-keyframes pulse_` + move + ` {
                 0%   { transform: }
-                
                 100%  { transform: rotate(` + angle + `deg) rotate(-` + angle + `deg) rotateY(180deg)}
             }`;
             const return_style = `
