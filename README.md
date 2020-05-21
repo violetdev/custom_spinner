@@ -1,6 +1,6 @@
 # custom_spinner
 
-Add events/texts then click Go to decide. Resets 5 secs after roll completes.
+Add events/texts then click Go to decide.
 
 Features to be added:
 1. Previous roll history
